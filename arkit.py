@@ -15,7 +15,7 @@ import logging
 
 
 __author__ = "James E"
-__contact__ = "https://github.com/james-d-elliott/arkit.py"
+__contact__ = "https://github.com/project-umbrella/arkit.py"
 __copyright__ = "Copyright 2015, Project Umbrella"
 __version__ = "0.0.0.1"
 __status__ = "Prototype"
