@@ -20,7 +20,7 @@ __copyright__ = "Copyright 2015, Project Umbrella"
 __version__ = "0.0.0.1"
 __status__ = "Prototype"
 __date__ = "16 October 2015"
-__license__ = "GPL v3.0 http://www.gnu.org/licenses/gpl-3.0.en.html"
+__license__ = "GPL v3.0 https://github.com/project-umbrella/arkit.py/blob/master/LICENSE"
 
 
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
