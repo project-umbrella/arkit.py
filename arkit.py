@@ -5,6 +5,9 @@ Only supports Python3, Python2 is end of life and outdated thus not supported.
 
 Purpose:
   Provide a Python toolkit for ARK. Originally designed to unpack the workshop archives.
+  
+Notice:
+  I use PEP 8 as per it was intended; if you want to PEP 8 me read it first instead of being foolish: "A Foolish Consistency is the Hobgoblin of Little Minds"
 '''
 
 
