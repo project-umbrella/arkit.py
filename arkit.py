@@ -80,9 +80,13 @@ def unpack(src, dst):
             for compressed, uncompressed in compression_index:
                 compressed_data = f.read(compressed)
                 uncompressed_data = zlib.decompress(compressed_data)
+
+                #Verify the size of the data is consistent with the archives index
                 if len(uncompressed_data) == uncompressed:
                     data += uncompressed_data
                     read_data += 1
+
+                    #Verify there is only one partial chunk
                     if len(uncompressed_data) != size_unpacked_chunk and read_data != len(compression_index):
                         logging.critical(" archive is corrupt. Index contains more than one partial chunk: was {} when the full chunk size is {}, chunk {}/{}".format(len(uncompressed_data), size_unpacked_chunk, read_data, len(compression_index)))
                         exit(1)
@@ -93,6 +97,7 @@ def unpack(src, dst):
             logging.critical(" archive is not valid or corrupt. Either the signature and format version is incorrect or the header does not contain integers.")
             exit(3)
 
+    #Write the extracted data to disk
     with open(dst, 'wb') as f:
         f.write(data)
     logging.info(" archive has been extracted.")
