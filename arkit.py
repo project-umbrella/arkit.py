@@ -20,7 +20,7 @@ import logging
 __author__ = "James E"
 __contact__ = "https://github.com/project-umbrella/arkit.py"
 __copyright__ = "Copyright 2015, Project Umbrella"
-__version__ = "0.0.0.1"
+__version__ = "0.0.0.2"
 __status__ = "Prototype"
 __date__ = "16 October 2015"
 __license__ = "GPL v3.0 https://github.com/project-umbrella/arkit.py/blob/master/LICENSE"
@@ -37,19 +37,32 @@ def unpack(src, dst):
         src = Source File/Archive
         dst = Destination File
 
+    Process:
+        1. Open the source file.
+        2. Read header information from archive:
+            - 00 (8 bytes) signature (6 bytes) and format ver (2 bytes)
+            - 08 (8 byes) unpacked/uncompressed chunk size
+            - 10 (8 bytes) packed/compressed full size
+            - 18 (8 bytes) unpacked/uncompressed size
+            - 20 (8 bytes) first chunk packed/compressed size
+            - 26 (8 bytes) first chunk unpacked/uncompressed size
+            - 20 and 26 repeat until the total of all the unpacked/uncompressed chunk sizes matches the unpacked/uncompressed full size.
+        2. Read all the archive data and verify integrity (there should only be one partial chunk, and each chunk should match the archives header).
+        3. Write the file.
+
     Error Handling:
         Currently only logs errors with an archive integrity. Also logs some debug and info messages.
         All file system errors are handled by python core.
 
     Development Note:
         - Not thoroughly tested for errors. There may be instances where this method may fail either to extract a valid archive or detect a corrupt archive.
-        - Create custom exceptions.
+        - Create custom exceptions and use those instead of exit().
         - Prevent overwriting files unless requested to do so.
         - Create a batch method.
     '''
 
     with open(src, 'rb') as f:
-        sigver = f.read(8)
+        sigver = struct.unpack('q', f.read(8))[0]
         unpacked_chunk = f.read(8)
         packed = f.read(8)
         unpacked = f.read(8)
@@ -58,7 +71,7 @@ def unpack(src, dst):
         size_unpacked = struct.unpack('q', unpacked)[0]
 
         #Verify the integrity of the Archive Header
-        if sigver == b'\xc1\x83\x2a\x9e\x00\x00\x00\x00' and isinstance(size_unpacked_chunk, int) and isinstance(size_packed , int) and isinstance(size_unpacked , int):
+        if sigver == 2653586369 and isinstance(size_unpacked_chunk, int) and isinstance(size_packed , int) and isinstance(size_unpacked , int):
             logging.info(" archive is valid.")
             logging.debug(" archive header size information. Unpacked Chunk: {}({}) Full Packed: {}({}) Full Unpacked: {}({})".format(size_unpacked_chunk, unpacked_chunk, size_packed, packed, size_unpacked, unpacked))
 
@@ -73,6 +86,10 @@ def unpack(src, dst):
                 compression_index.append((compressed, uncompressed))
                 size_indexed += uncompressed
                 logging.debug("{}: {}/{} ({}/{}) - {} - {}".format(len(compression_index), size_indexed, size_unpacked, compressed, uncompressed, raw_compressed, raw_uncompressed))
+
+            if size_unpacked != size_indexed:
+                logging.critical(" archive is corrupt. Header-Index mismatch. Header indicates it should only have {} bytes when uncompressed but the index indicates {} bytes.".format(size_unpacked, size_indexed))
+                exit(4)
 
             #Read the actual archive data
             data = b''
@@ -94,7 +111,7 @@ def unpack(src, dst):
                     logging.critical(" archive is corrupt. Uncompressed chunk size is not the same as in the index: was {} but should be {}.".format(len(uncompressed_data), size_uncompressed))
                     exit(2)
         else:
-            logging.critical(" archive is not valid or corrupt. Either the signature and format version is incorrect or the header does not contain integers.")
+            logging.critical(" archive is not valid or corrupt. Either the signature and format version is incorrect or the header does not contain integers. Signature was {} should be 2653586369. Size Types: unpacked_chunk({}), packed({}), unpacked({})".format(sigver, type(size_unpacked_chunk), type(size_packed), type(size_unpacked)))
             exit(3)
 
     #Write the extracted data to disk
