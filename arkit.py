@@ -34,7 +34,7 @@ class UnpackException(Exception):
 class SignatureUnpackException(UnpackException):
     pass
 
-class CorruptUnpackException(UnpackException)
+class CorruptUnpackException(UnpackException):
     pass
 
 def unpack(src, dst):
@@ -96,7 +96,7 @@ def unpack(src, dst):
                     logging.debug("{}: {}/{} ({}/{}) - {} - {}".format(len(compression_index), size_indexed, size_unpacked, compressed, uncompressed, raw_compressed, raw_uncompressed))
 
                 if size_unpacked != size_indexed:
-                    msg = "Header-Index mismatch. Header indicates it should only have {} bytes when uncompressed but the index indicates {} bytes.".format(size_unpacked, size_indexed))
+                    msg = "Header-Index mismatch. Header indicates it should only have {} bytes when uncompressed but the index indicates {} bytes.".format(size_unpacked, size_indexed)
                     logging.critical(msg)
                     raise CorruptUnpackException(msg)
 
@@ -118,11 +118,11 @@ def unpack(src, dst):
                             logging.critical(msg)
                             raise CorruptUnpackException(msg)
                     else:
-                        msg = "Uncompressed chunk size is not the same as in the index: was {} but should be {}.".format(len(uncompressed_data), size_uncompressed)
+                        msg = "Uncompressed chunk size is not the same as in the index: was {} but should be {}.".format(len(uncompressed_data), uncompressed)
                         logging.critical(msg)
                         raise CorruptUnpackException(msg)
             else:
-                msg = "Data types in the headers should be int's. Size Types: unpacked_chunk({}), packed({}), unpacked({})".format(sigver, type(size_unpacked_chunk), type(size_packed), type(size_unpacked)))
+                msg = "Data types in the headers should be int's. Size Types: unpacked_chunk({}), packed({}), unpacked({})".format(sigver, type(size_unpacked_chunk), type(size_packed), type(size_unpacked))
                 logging.critical(msg)
                 raise CorruptUnpackException(msg)
         else:
